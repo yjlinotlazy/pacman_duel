@@ -2,20 +2,21 @@
 
 ## 1. Overview
 
-`pacman_duel` is a local-first duel game built around a Pacman-style board, two opposing sides, and pluggable AI strategies.
+`pacman_duel` is a Pacman-style duel game built around two opposing sides and pluggable AI strategies. The primary product goal is to help players understand reinforcement learning through direct play, observation, and comparison of different control algorithms.
 
 - Pacman wins by eating all dots.
 - The enemy side wins when either the slime or helper catches Pacman.
 - If Pacman eats the last dot on the same tick that an enemy catches Pacman, Pacman wins.
 - The system must support `Human vs AI`, `AI vs Human`, and `AI vs AI`.
-- Advanced mode must support algorithm-specific parameters and estimated win rate display.
+- Advanced mode must support algorithm-specific parameters and win rate display based on stored historical results.
 
 The design should prioritize:
 
-- clean separation between game rules, AI logic, simulation, and UI
+- clean separation between game rules, AI logic, match history/statistics, and UI
 - fast iteration for algorithms such as BFS and reinforcement learning
-- desktop GUI support with Wayland compatibility
+- support either a web UI or a local GUI, with Wayland support required for the local build
 - testability of the core game rules without UI dependencies
+- clear extension points for future boards, user-provided ML models, additional slimes, and cross-platform packaging
 
 ## 2. Recommended Tech Stack
 
@@ -35,8 +36,8 @@ The design should prioritize:
 
 ### Why this stack
 
-- `PySide6` is a better fit than a game-only library for menus, parameter panels, and win-rate displays.
-- Python keeps pathfinding, simulation, and AI iteration cheap.
+- `PySide6` is a good fit for a local GUI with menus, parameter panels, and history-based win-rate displays.
+- Python keeps pathfinding, statistics processing, and AI iteration cheap.
 - The game is small enough that Python performance should be sufficient if the core loop is kept simple.
 
 ### Pros
@@ -48,7 +49,7 @@ The design should prioritize:
 
 ### Cons
 
-- Desktop-first architecture is not the most natural base for a web-first product
+- Supporting both local and web frontends will require clear boundaries around UI and session orchestration
 - Python has lower performance headroom than Rust/C++
 - RL training may require process/thread separation later
 
@@ -58,7 +59,7 @@ The system is split into five major layers:
 
 1. `Core Game Engine`
 2. `Agents / AI`
-3. `Simulation / Statistics`
+3. `Match History / Statistics`
 4. `UI Layer`
 5. `Application Orchestration`
 
@@ -85,9 +86,10 @@ pacman_duel/
       shortest_path.py
       copycat.py
       rl_agent.py
-    sim/
-      runner.py
+    stats/
+      history_store.py
       winrate.py
+      summaries.py
     ui/
       main_window.py
       menu_screen.py
@@ -164,7 +166,8 @@ Source: `docs/diagrams/mermaid/engine_rules.mmd`
 - The helper always exists as part of the enemy side.
 - The helper uses shortest-path behavior by default.
 - If final-dot consumption and capture happen on the same tick, Pacman wins.
-- `q` and `esc` are UI-level controls, not core rule logic.
+- Pacman human control uses `UP`, `DOWN`, `LEFT`, `RIGHT`.
+- `q` and `esc` are UI-level controls to leave the match and return to the main menu, not core rule logic.
 
 ## 7. Agent Design
 
@@ -240,29 +243,29 @@ Source: `docs/diagrams/mermaid/app_session.mmd`
 - creates and destroys sessions
 - translates UI selections into runtime configuration
 - drives frame updates
-- triggers win-rate estimation jobs
+- refreshes history-based win-rate summaries for the selected configuration
 
 #### `GameSession`
 
 - bundles one match config, its agents, and its engine
 - provides the per-tick interface used by the UI timer
 
-## 9. Simulation and Win-Rate Estimation
+## 9. Match History and Win-Rate Statistics
 
-Advanced mode requires many automated matches using the current parameter set.
+Advanced mode shows win rates using stored real match results rather than simulated rollouts.
 
 ### Why it is a separate layer
 
-- simulation should not block the UI thread
-- bulk matches should reuse the same engine/rule system as real gameplay
-- statistics should be deterministic under a fixed seed
+- gameplay should persist every completed match result
+- win-rate displays should come from historical data, not from synthetic simulations
+- the storage layer should support later filtering by algorithm, parameter set, board, and version
 
-### Main interface
+### Main interfaces
 
 ```python
-class SimulationRunner:
-    def run_match(self, config: MatchConfig) -> MatchResult: ...
-    def run_batch(self, config: MatchConfig, rounds: int) -> BatchResult: ...
+class MatchHistoryStore(Protocol):
+    def record_result(self, result: MatchResult) -> None: ...
+    def query_summary(self, query: StatsQuery) -> WinRateSummary: ...
 ```
 
 ### Result models
@@ -270,17 +273,24 @@ class SimulationRunner:
 - `MatchResult`
   - winner
   - tick_count
-  - optional replay summary
+  - pacman_controller
+  - slime_controller
+  - helper_controller
+  - parameter_snapshot
+  - board_id
+  - played_at
 
-- `BatchResult`
+- `WinRateSummary`
   - `pacman_win_rate`
   - `enemy_win_rate`
-  - `avg_ticks`
   - `samples`
+  - optional confidence or warning when sample size is small
 
-![Simulation flow diagram](docs/diagrams/images/simulation_flow.png)
+### Storage notes
 
-Source: `docs/diagrams/mermaid/simulation_flow.mmd`
+- start with a simple local file or SQLite-backed store
+- writes happen after each completed match
+- reads must be fast enough to refresh advanced-mode UI immediately after a config change
 
 ## 10. UI Design
 
@@ -300,12 +310,13 @@ The UI should stay thin. It renders state and captures input, but it does not im
 
 - `AdvancedPanel`
   - shows parameter editor
-  - runs win-rate estimation
-  - displays summary stats
+  - reads historical win-rate statistics for the current configuration
+  - displays summary stats and sample counts
 
 - `GameView`
   - draws board and entities
   - receives keyboard input
+  - maps arrow keys to Pacman movement
   - supports `q` / `esc` to return to menu
 
 ## 11. Configuration Model
@@ -329,11 +340,11 @@ class MatchConfig(BaseModel):
 
 ### Benefits
 
-- one shared config format for UI, game runtime, and simulations
+- one shared config format for UI, runtime, and stored match history queries
 - easy preset serialization
 - algorithm-specific forms can be generated from metadata
 
-## 12. Concurrency Model
+## 12. Persistence and Concurrency Model
 
 ### Real-time match
 
@@ -341,11 +352,11 @@ class MatchConfig(BaseModel):
 - `QTimer` triggers game ticks
 - each tick reads current inputs and advances one frame
 
-### Simulation jobs
+### Match history writes
 
-- background worker thread or thread pool
-- no UI calls inside simulation workers
-- results pushed back to UI safely after completion
+- result persistence can happen synchronously if cheap, or on a background worker if storage latency becomes visible
+- writes must not block rendering long enough to affect match flow
+- persisted data should include enough metadata to support future analysis and filtering
 
 ### Future RL training
 
@@ -375,10 +386,11 @@ The core logic must be tested independently from the GUI.
 - `ShortestPathAgent` reduces distance when path exists
 - `CopycatAgent` switches from seek mode to replay mode correctly
 
-#### Simulation
+#### Statistics
 
-- batch counts are correct
-- seeded runs are reproducible
+- completed matches are persisted exactly once
+- win-rate summaries use historical data filters correctly
+- low-sample summaries are labeled clearly
 
 ## 14. Suggested Implementation Plan
 
@@ -387,24 +399,27 @@ The core logic must be tested independently from the GUI.
 - implement `Board`, `GameState`, `RuleEngine`, `GameEngine`
 - implement `HumanAgent`, `RandomAgent`, `ShortestPathAgent`
 - build basic menu and game view
+- persist completed match results
 
 ### Milestone 2
 
 - implement `CopycatAgent`
 - add advanced mode configuration UI
-- add `SimulationRunner` and win-rate display
+- add history-backed win-rate display
 
 ### Milestone 3
 
 - add `RLAgent` integration
 - add preset save/load
+- add richer statistics filters and summaries
 - refine balancing and parameter tuning
 
 ## 15. Design Constraints and Principles
 
 - Keep `GameState` independent from UI frameworks.
 - Keep rules deterministic where possible.
-- Reuse the same engine for both gameplay and simulation.
+- Reuse the same core match/result model across gameplay, persistence, and statistics.
+- Persist match data in a format that can survive future schema extension.
 - Prefer pure functions or stateless services in the rules layer.
 - Do not let agents mutate state directly.
 - Keep RL support behind a stable interface so it can remain optional early on.
