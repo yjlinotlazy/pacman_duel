@@ -51,7 +51,7 @@ The design should prioritize:
 
 - Supporting both local and web frontends will require clear boundaries around UI and session orchestration
 - Python has lower performance headroom than Rust/C++
-- RL training may require process/thread separation later
+- RL training may require process/thread separation later; in practice, training should be isolated from gameplay and UI, with process isolation preferred. See `model_design.md` for the detailed design.
 
 ## 3. Architecture Summary
 
