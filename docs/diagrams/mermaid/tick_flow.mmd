@@ -1,0 +1,9 @@
+flowchart TD
+    A[Start Tick] --> B[Collect actions]
+    B --> C[Validate moves]
+    C --> D[Apply movement]
+    D --> E[Resolve dot consumption]
+    E --> F[Resolve capture]
+    F --> G[Resolve win condition]
+    G --> H[Update history and tick count]
+    H --> I[End Tick]

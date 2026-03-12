@@ -1,0 +1,5 @@
+flowchart TD
+    A[User changes advanced-mode params] --> B[AppController submits simulation job]
+    B --> C[SimulationRunner runs N matches]
+    C --> D[Aggregate results]
+    D --> E[Stats panel updates win rate]

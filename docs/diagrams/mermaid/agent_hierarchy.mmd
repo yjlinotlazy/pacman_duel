@@ -1,0 +1,37 @@
+classDiagram
+    class Agent {
+        <<interface>>
+        +next_action(state, config) Direction
+        +reset()
+    }
+
+    class HumanAgent {
+        +set_input(direction)
+        +next_action(state, config) Direction
+    }
+
+    class RandomAgent {
+        +next_action(state, config) Direction
+    }
+
+    class ShortestPathAgent {
+        +next_action(state, config) Direction
+    }
+
+    class CopycatAgent {
+        +phase
+        +replay_index
+        +next_action(state, config) Direction
+    }
+
+    class RLAgent {
+        +model
+        +load_model(path)
+        +next_action(state, config) Direction
+    }
+
+    Agent <|.. HumanAgent
+    Agent <|.. RandomAgent
+    Agent <|.. ShortestPathAgent
+    Agent <|.. CopycatAgent
+    Agent <|.. RLAgent

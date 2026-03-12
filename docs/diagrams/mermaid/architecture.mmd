@@ -1,0 +1,11 @@
+flowchart TD
+    UI[UI Layer<br/>Main menu, config panel, game view, stats]
+    APP[Application Layer<br/>Session lifecycle, mode control]
+    ENGINE[Game Engine<br/>Tick loop, rules, collisions, win logic]
+    AGENTS[Agents<br/>Human, Random, ShortestPath, Copycat, RL]
+    SIM[Simulation Layer<br/>Batch matches, win-rate estimation]
+
+    UI --> APP
+    APP --> ENGINE
+    APP --> SIM
+    ENGINE --> AGENTS

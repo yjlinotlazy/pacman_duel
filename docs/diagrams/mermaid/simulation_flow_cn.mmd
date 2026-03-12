@@ -1,0 +1,5 @@
+flowchart TD
+    A[用户修改进阶模式参数] --> B[AppController 提交模拟任务]
+    B --> C[SimulationRunner 运行 N 局对战]
+    C --> D[聚合结果]
+    D --> E[统计面板更新胜率]

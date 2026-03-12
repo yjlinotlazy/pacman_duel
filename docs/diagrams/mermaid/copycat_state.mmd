@@ -1,0 +1,4 @@
+stateDiagram-v2
+    [*] --> SEEK_START
+    SEEK_START --> REPLAY_HISTORY: reached Pacman initial position
+    REPLAY_HISTORY --> REPLAY_HISTORY: consume next historical action

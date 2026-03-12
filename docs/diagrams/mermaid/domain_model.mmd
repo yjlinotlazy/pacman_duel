@@ -1,0 +1,38 @@
+classDiagram
+    class Position {
+        +int x
+        +int y
+    }
+
+    class EntityState {
+        +Role role
+        +Position pos
+        +Direction direction
+        +bool alive
+    }
+
+    class Board {
+        +tiles
+        +int width
+        +int height
+        +is_wall(pos) bool
+        +has_dot(pos) bool
+        +eat_dot(pos) bool
+        +in_bounds(pos) bool
+    }
+
+    class GameState {
+        +Board board
+        +EntityState pacman
+        +EntityState slime
+        +EntityState helper
+        +int tick
+        +int dots_remaining
+        +list pacman_history
+        +MatchStatus status
+        +clone()
+    }
+
+    EntityState --> Position
+    GameState --> Board
+    GameState --> EntityState

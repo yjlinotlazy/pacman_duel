@@ -1,0 +1,4 @@
+stateDiagram-v2
+    [*] --> SEEK_START
+    SEEK_START --> REPLAY_HISTORY: 到达 Pacman 初始位置
+    REPLAY_HISTORY --> REPLAY_HISTORY: 消耗下一条历史动作

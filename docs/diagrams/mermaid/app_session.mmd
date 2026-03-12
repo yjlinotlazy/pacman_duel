@@ -1,0 +1,27 @@
+classDiagram
+    class MainWindow {
+        +show_menu()
+        +show_game()
+        +show_advanced()
+    }
+
+    class AppController {
+        +start_match(cfg)
+        +return_to_menu()
+        +update_frame()
+        +estimate_winrate()
+    }
+
+    class GameSession {
+        +tick() GameState
+        +get_state() GameState
+        +reset() GameState
+    }
+
+    class GameEngine
+    class SimulationRunner
+
+    MainWindow --> AppController
+    AppController --> GameSession
+    AppController --> SimulationRunner
+    GameSession --> GameEngine

@@ -1,0 +1,20 @@
+classDiagram
+    class GameEngine {
+        +GameState state
+        +step(actions) GameState
+        +reset() GameState
+        +get_state() GameState
+    }
+
+    class RuleEngine {
+        +validate_move(state, entity, action)
+        +apply_moves(state, actions)
+        +resolve_dots(state)
+        +resolve_capture(state)
+        +resolve_win(state)
+    }
+
+    class GameState
+
+    GameEngine --> RuleEngine
+    GameEngine --> GameState

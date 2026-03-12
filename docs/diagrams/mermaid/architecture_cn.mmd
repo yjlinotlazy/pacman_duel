@@ -1,0 +1,11 @@
+flowchart TD
+    UI[UI 层<br/>主菜单、配置面板、游戏视图、统计]
+    APP[应用层<br/>会话生命周期、模式控制]
+    ENGINE[游戏引擎<br/>Tick 循环、规则、碰撞、胜负逻辑]
+    AGENTS[代理层<br/>Human、Random、ShortestPath、Copycat、RL]
+    SIM[模拟层<br/>批量对战、胜率估算]
+
+    UI --> APP
+    APP --> ENGINE
+    APP --> SIM
+    ENGINE --> AGENTS
