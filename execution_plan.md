@@ -49,10 +49,10 @@ Deliver a playable local version of `pacman_duel` with a clean separation betwee
 ### Tasks
 
 - [x] Define the `Agent` protocol.
-- [ ] Implement `HumanAgent`.
+- [x] Implement `HumanAgent`.
 - [x] Implement `RandomAgent`.
 - [x] Implement `ShortestPathAgent` using BFS.
-- [ ] Implement `CopycatAgent` with two-phase replay behavior.
+- [x] Implement `CopycatAgent` with two-phase replay behavior.
 - [x] Ensure all agents return actions without mutating game state.
 - [x] Add tests for baseline agent behavior.
 
