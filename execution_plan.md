@@ -92,11 +92,11 @@ Deliver a playable local version of `pacman_duel` with a clean separation betwee
 
 ### Tasks
 
-- [ ] Implement a history storage format.
+- [x] Implement a history storage format.
 - [ ] Persist match outcome, agent choices, and relevant config metadata.
-- [ ] Implement summary generation utilities.
-- [ ] Implement win-rate aggregation from stored results.
-- [ ] Add tests for storage and aggregation behavior.
+- [x] Implement summary generation utilities.
+- [x] Implement win-rate aggregation from stored results.
+- [x] Add tests for storage and aggregation behavior.
 
 ### Exit Criteria
 
