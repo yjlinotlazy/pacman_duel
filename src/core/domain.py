@@ -1,6 +1,6 @@
-from __future__ import annotations
-
 """Core immutable domain types shared by the engine, rules, and agents."""
+
+from __future__ import annotations
 
 from dataclasses import dataclass, replace
 from enum import Enum

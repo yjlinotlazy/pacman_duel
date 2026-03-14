@@ -1,6 +1,6 @@
-from __future__ import annotations
-
 """Pure rule helpers for legal movement, state updates, and win resolution."""
+
+from __future__ import annotations
 
 from dataclasses import replace
 

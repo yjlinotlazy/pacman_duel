@@ -1,6 +1,6 @@
-from __future__ import annotations
-
 """Random-move baseline agent."""
+
+from __future__ import annotations
 
 import random
 

@@ -1,6 +1,6 @@
-from __future__ import annotations
-
 """Pathfinding helpers used by pursuit-style agents."""
+
+from __future__ import annotations
 
 from collections import deque
 

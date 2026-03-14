@@ -1,6 +1,6 @@
-from __future__ import annotations
-
 """Board representation and parsing helpers."""
+
+from __future__ import annotations
 
 from dataclasses import dataclass
 

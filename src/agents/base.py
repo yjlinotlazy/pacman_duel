@@ -1,6 +1,6 @@
-from __future__ import annotations
-
 """Shared agent protocol used by session orchestration."""
+
+from __future__ import annotations
 
 from typing import Protocol
 

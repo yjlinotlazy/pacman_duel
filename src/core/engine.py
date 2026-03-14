@@ -1,6 +1,6 @@
-from __future__ import annotations
-
 """Engine that applies per-tick actions using the core rule helpers."""
+
+from __future__ import annotations
 
 from dataclasses import replace
 

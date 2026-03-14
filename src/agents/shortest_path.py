@@ -1,6 +1,6 @@
-from __future__ import annotations
-
 """Shortest-path pursuit agent built on BFS."""
+
+from __future__ import annotations
 
 from src.algorithms.pathfinding import bfs_shortest_path_direction
 from src.core.domain import Direction, GameState, Role

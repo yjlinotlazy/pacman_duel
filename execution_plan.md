@@ -22,16 +22,16 @@ Deliver a playable local version of `pacman_duel` with a clean separation betwee
 
 ### Tasks
 
-- [~] Add the skeleton of core engine
-- [~] Validate the newly added core engine, baseline agents, and session scaffolding with `pytest`, and fix any issues found during that pass.
-- [ ] Define `Position`, `EntityState`, `Board`, `GameState`, and required enums.
-- [ ] Define legal movement and bounds-checking behavior.
-- [ ] Implement tick processing order in the engine.
-- [ ] Implement dot consumption rules.
-- [ ] Implement capture rules.
-- [ ] Implement win/loss resolution rules.
-- [ ] Preserve the rule that Pacman wins if the last dot is eaten on the same tick as capture.
-- [ ] Add unit tests for normal and edge-case rule behavior.
+- [x] Add the skeleton of core engine.
+- [x] Validate the newly added core engine, baseline agents, and session scaffolding with `pytest`, and fix any issues found during that pass.
+- [x] Define `Position`, `EntityState`, `Board`, `GameState`, and required enums.
+- [x] Define legal movement and bounds-checking behavior.
+- [x] Implement tick processing order in the engine.
+- [x] Implement dot consumption rules.
+- [x] Implement capture rules.
+- [x] Implement win/loss resolution rules.
+- [x] Preserve the rule that Pacman wins if the last dot is eaten on the same tick as capture.
+- [x] Add unit tests for normal and edge-case rule behavior.
 
 ### Exit Criteria
 
@@ -48,13 +48,13 @@ Deliver a playable local version of `pacman_duel` with a clean separation betwee
 
 ### Tasks
 
-- [ ] Define the `Agent` protocol.
+- [x] Define the `Agent` protocol.
 - [ ] Implement `HumanAgent`.
-- [ ] Implement `RandomAgent`.
-- [ ] Implement `ShortestPathAgent` using BFS.
+- [x] Implement `RandomAgent`.
+- [x] Implement `ShortestPathAgent` using BFS.
 - [ ] Implement `CopycatAgent` with two-phase replay behavior.
-- [ ] Ensure all agents return actions without mutating game state.
-- [ ] Add tests for baseline agent behavior.
+- [x] Ensure all agents return actions without mutating game state.
+- [x] Add tests for baseline agent behavior.
 
 ### Exit Criteria
 
@@ -71,11 +71,11 @@ Deliver a playable local version of `pacman_duel` with a clean separation betwee
 
 ### Tasks
 
-- [ ] Implement `GameSession` to own one match configuration, engine instance, and agent set.
+- [x] Implement `GameSession` to own one match configuration, engine instance, and agent set.
 - [ ] Implement `AppController` to create, reset, destroy, and switch sessions.
 - [ ] Add configuration translation from UI-friendly options to runtime config.
-- [ ] Expose a clean step/tick interface for the presentation layer.
-- [ ] Add tests for session startup, stepping, reset, and teardown.
+- [x] Expose a clean step/tick interface for the presentation layer.
+- [x] Add tests for session startup, stepping, reset, and teardown.
 
 ### Exit Criteria
 
@@ -277,18 +277,18 @@ Deliver a playable local version of `pacman_duel` with a clean separation betwee
 
 ### Documentation
 
-- [ ] Keep `design.md`, `design_cn.md`, `model_design.md`, and `model_design_cn.md` aligned with implementation.
-- [ ] Document module boundaries as they become concrete.
+- [x] Keep `design.md`, `design_cn.md`, `model_design.md`, and `model_design_cn.md` aligned with implementation.
+- [x] Document module boundaries as they become concrete.
 
 ### Testing
 
-- [ ] Maintain fast unit tests for `core/`.
-- [ ] Add integration tests for sessions and persistence.
+- [x] Maintain fast unit tests for `core/`.
+- [~] Add integration tests for sessions and persistence.
 - [ ] Add targeted tests for RL observation and action contracts.
 
 ### Code Quality
 
-- [ ] Keep boundaries explicit between `core/`, `algorithms/`, `agents/`, `training/`, `stats/`, and `ui/`.
+- [x] Keep boundaries explicit between `core/`, `algorithms/`, `agents/`, `training/`, `stats/`, and `ui/`.
 - [ ] Avoid leaking UI concerns into rules or ML code.
 - [ ] Avoid leaking training concerns into gameplay runtime.
 
