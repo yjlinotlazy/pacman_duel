@@ -22,6 +22,8 @@ Deliver a playable local version of `pacman_duel` with a clean separation betwee
 
 ### Tasks
 
+- [~] Add the skeleton of core engine
+- [~] Validate the newly added core engine, baseline agents, and session scaffolding with `pytest`, and fix any issues found during that pass.
 - [ ] Define `Position`, `EntityState`, `Board`, `GameState`, and required enums.
 - [ ] Define legal movement and bounds-checking behavior.
 - [ ] Implement tick processing order in the engine.
@@ -286,7 +288,7 @@ Deliver a playable local version of `pacman_duel` with a clean separation betwee
 
 ### Code Quality
 
-- [ ] Keep boundaries explicit between `core/`, `agents/`, `training/`, `stats/`, and `ui/`.
+- [ ] Keep boundaries explicit between `core/`, `algorithms/`, `agents/`, `training/`, `stats/`, and `ui/`.
 - [ ] Avoid leaking UI concerns into rules or ML code.
 - [ ] Avoid leaking training concerns into gameplay runtime.
 

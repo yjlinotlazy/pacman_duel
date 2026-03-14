@@ -73,12 +73,13 @@
 pacman_duel/
   src/
     app.py
+    algorithms/
+      pathfinding.py
     core/
       board.py
-      models.py
+      domain.py
       rules.py
       engine.py
-      pathfinding.py
     agents/
       base.py
       human.py
@@ -139,6 +140,8 @@ pacman_duel/
 ## 6. 引擎与规则
 
 引擎负责状态推进，规则层负责具体机制。
+
+`src/core/` 应只负责领域类型、状态推进和规则本身。像路径搜索这类可复用算法应放在 `src/algorithms/`，这样 agent 和未来模型代码都可以共享，而不会让 `core/` 语义变得过宽。
 
 ### Tick 执行顺序
 
@@ -202,6 +205,7 @@ class Agent(Protocol):
 #### `ShortestPathAgent`
 
 - 使用 BFS
+- 路径搜索辅助逻辑来自 `src/algorithms/pathfinding.py`
 - 史莱姆目标：当前 Pacman 位置
 - 助手目标：当前 Pacman 位置
 - 后续可以增加平局时的 tie-break 配置

@@ -73,12 +73,13 @@ Source: `docs/diagrams/mermaid/architecture.mmd`
 pacman_duel/
   src/
     app.py
+    algorithms/
+      pathfinding.py
     core/
       board.py
-      models.py
+      domain.py
       rules.py
       engine.py
-      pathfinding.py
     agents/
       base.py
       human.py
@@ -139,6 +140,8 @@ Source: `docs/diagrams/mermaid/domain_model.mmd`
 ## 6. Engine and Rules
 
 The engine owns state transitions. The rules layer owns the detailed mechanics.
+
+`src/core/` should remain responsible for domain types, state transitions, and rule enforcement. Reusable algorithms such as pathfinding should live under `src/algorithms/` so they can be shared by agents or future model code without overloading the meaning of `core/`.
 
 ### Tick order
 
@@ -202,6 +205,7 @@ Source: `docs/diagrams/mermaid/agent_hierarchy.mmd`
 #### `ShortestPathAgent`
 
 - Uses BFS
+- Reads its pathfinding helper from `src/algorithms/pathfinding.py`
 - Slime target: current Pacman position
 - Helper target: current Pacman position
 - Configurable tie-breaking can be added later

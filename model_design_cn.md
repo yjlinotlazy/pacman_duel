@@ -89,12 +89,13 @@ RL 训练和普通 agent 推理在运行特性上完全不同。
 pacman_duel/
   src/
     app.py
+    algorithms/
+      pathfinding.py
     core/
       board.py
-      models.py
+      domain.py
       rules.py
       engine.py
-      pathfinding.py
     agents/
       base.py
       human.py
@@ -140,6 +141,12 @@ pacman_duel/
 - 定义棋盘、实体、规则和确定性的状态推进
 - 必须独立于 UI 和 RL 框架
 - 必须可以单独测试
+
+### `src/algorithms/`
+
+- 存放可复用算法，例如 BFS 路径搜索
+- 可被 gameplay agent、评估代码以及未来的模型工具复用
+- 可以依赖 `core/` 中的领域类型，但不应该承载游戏规则
 
 ### `src/training/env.py`
 

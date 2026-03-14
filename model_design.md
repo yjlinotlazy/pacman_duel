@@ -89,12 +89,13 @@ Use a separate process for RL training by default. Use threads only for short-li
 pacman_duel/
   src/
     app.py
+    algorithms/
+      pathfinding.py
     core/
       board.py
-      models.py
+      domain.py
       rules.py
       engine.py
-      pathfinding.py
     agents/
       base.py
       human.py
@@ -140,6 +141,12 @@ pacman_duel/
 - Defines the board, entities, rules, and deterministic state transitions
 - Must stay independent from UI and RL frameworks
 - Must be easy to test in isolation
+
+### `src/algorithms/`
+
+- Stores reusable algorithms such as BFS pathfinding
+- Can be shared by gameplay agents, evaluation code, and future model-facing utilities
+- Should depend on `core/` domain types, but should not own game rules
 
 ### `src/training/env.py`
 
