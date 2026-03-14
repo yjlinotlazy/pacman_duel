@@ -72,8 +72,8 @@ Deliver a playable local version of `pacman_duel` with a clean separation betwee
 ### Tasks
 
 - [x] Implement `GameSession` to own one match configuration, engine instance, and agent set.
-- [ ] Implement `AppController` to create, reset, destroy, and switch sessions.
-- [ ] Add configuration translation from UI-friendly options to runtime config.
+- [x] Implement `AppController` to create, reset, destroy, and switch sessions.
+- [x] Add configuration translation from UI-friendly options to runtime config.
 - [x] Expose a clean step/tick interface for the presentation layer.
 - [x] Add tests for session startup, stepping, reset, and teardown.
 
