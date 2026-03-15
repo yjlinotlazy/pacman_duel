@@ -113,13 +113,13 @@ Deliver a playable local version of `pacman_duel` with a clean separation betwee
 
 ### Tasks
 
-- [ ] Implement `MainWindow`.
-- [ ] Implement menu and configuration screens.
-- [ ] Implement the game view.
+- [x] Implement `MainWindow`.
+- [x] Implement menu and configuration screens.
+- [x] Implement the game view.
 - [ ] Implement a stats panel for history-backed summaries.
-- [ ] Wire keyboard input for human-controlled matches.
-- [ ] Support leaving a match and returning to the menu without affecting core rules.
-- [ ] Verify the local GUI works under Wayland.
+- [x] Wire keyboard input for human-controlled matches.
+- [x] Support leaving a match and returning to the menu without affecting core rules.
+- [x] Verify the local GUI works under Wayland.
 
 ### Exit Criteria
 
