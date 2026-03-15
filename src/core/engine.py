@@ -48,6 +48,7 @@ class GameEngine:
 def build_initial_state(
     board: "Board",
     spawns: dict[Role, "Position"],
+    speed_scaling_factor: int | str = 1,
 ) -> GameState:
     """Construct the first `GameState` from a parsed board and spawn map."""
 
@@ -57,5 +58,6 @@ def build_initial_state(
         slime=EntityState(role=Role.SLIME, position=spawns[Role.SLIME]),
         helper=EntityState(role=Role.HELPER, position=spawns[Role.HELPER]),
         dots=board.initial_dots,
+        speed_scaling_factor=speed_scaling_factor,
         pacman_start=spawns[Role.PACMAN],
     )

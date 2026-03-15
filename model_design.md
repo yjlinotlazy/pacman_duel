@@ -98,11 +98,17 @@ pacman_duel/
       engine.py
     agents/
       base.py
-      human.py
-      random_agent.py
-      shortest_path.py
-      copycat.py
-      rl_agent.py
+      pacman/
+        base.py
+        human.py
+        random.py
+        rl.py
+      slime/
+        base.py
+        random.py
+        shortest_path.py
+        copycat.py
+        rl.py
     training/
       env.py
       observation.py
@@ -180,11 +186,17 @@ pacman_duel/
 - Defines checkpoint naming, metadata, and retention policy
 - Keeps file layout and model metadata consistent
 
-### `src/agents/rl_agent.py`
+### `src/agents/pacman/` and `src/agents/slime/`
 
-- Loads a trained model from disk
-- Converts the current state into an observation
-- Returns one action for the current tick
+- Separate Pacman-side and slime-side runtime policies
+- Make role-specific goals explicit in the directory structure
+- Prevent side-incompatible algorithms from being configured accidentally
+
+### `src/agents/pacman/rl.py` and `src/agents/slime/rl.py`
+
+- Load trained models from disk
+- Convert the current state into side-specific observations
+- Return one action for the current tick
 - Must not perform training
 
 ## 7. Runtime Boundaries

@@ -82,11 +82,17 @@ pacman_duel/
       engine.py
     agents/
       base.py
-      human.py
-      random_agent.py
-      shortest_path.py
-      copycat.py
-      rl_agent.py
+      pacman/
+        base.py
+        human.py
+        random.py
+        rl.py
+      slime/
+        base.py
+        random.py
+        shortest_path.py
+        copycat.py
+        rl.py
     stats/
       history_store.py
       winrate.py
@@ -184,48 +190,14 @@ class Agent(Protocol):
     def reset(self) -> None: ...
 ```
 
-### Agent hierarchy
+### Role-specific agent families
 
-![Agent hierarchy diagram](docs/diagrams/images/agent_hierarchy.png)
+- `src/agents/pacman/` contains agents whose objective is to maximize Pacman's success.
+- `src/agents/slime/` contains agents for the enemy side, including helper behavior.
+- `Helper` should be treated as part of the slime-side agent family rather than as a third independent family.
+- `AppController` should validate agent choices by side so Pacman-only and slime-only algorithms cannot be mixed accidentally.
 
-Source: `docs/diagrams/mermaid/agent_hierarchy.mmd`
-
-### Built-in strategies
-
-#### `HumanAgent`
-
-- Reads last valid input from UI
-- Should be independent from direct widget logic
-
-#### `RandomAgent`
-
-- Chooses randomly from legal actions
-- Useful as baseline and for smoke testing
-
-#### `ShortestPathAgent`
-
-- Uses BFS
-- Reads its pathfinding helper from `src/algorithms/pathfinding.py`
-- Slime target: current Pacman position
-- Helper target: current Pacman position
-- Configurable tie-breaking can be added later
-
-#### `CopycatAgent`
-
-Two-phase behavior:
-
-1. Move toward Pacman's initial position
-2. Replay Pacman's historical actions exactly, including optional `STAY`
-
-![Copycat state diagram](docs/diagrams/images/copycat_state.png)
-
-Source: `docs/diagrams/mermaid/copycat_state.mmd`
-
-#### `RLAgent`
-
-- Keep interface stable first
-- A stub implementation is acceptable in the first milestone
-- Training should stay outside the real-time UI loop
+Detailed algorithm descriptions live in `agents.md`.
 
 ## 8. Application and Session Layer
 
@@ -386,9 +358,9 @@ The core logic must be tested independently from the GUI.
 
 #### Agents
 
-- `RandomAgent` only returns legal actions
-- `ShortestPathAgent` reduces distance when path exists
-- `CopycatAgent` switches from seek mode to replay mode correctly
+- Pacman random agents only return legal Pacman actions
+- Slime shortest-path agents reduce distance when path exists
+- Slime copycat agents switch from seek mode to replay mode correctly
 
 #### Statistics
 
@@ -401,13 +373,13 @@ The core logic must be tested independently from the GUI.
 ### Milestone 1
 
 - implement `Board`, `GameState`, `RuleEngine`, `GameEngine`
-- implement `HumanAgent`, `RandomAgent`, `ShortestPathAgent`
+- implement pacman `HumanAgent`, pacman/slime `RandomAgent`, and slime `ShortestPathAgent`
 - build basic menu and game view
 - persist completed match results
 
 ### Milestone 2
 
-- implement `CopycatAgent`
+- implement slime `CopycatAgent`
 - add advanced mode configuration UI
 - add history-backed win-rate display
 

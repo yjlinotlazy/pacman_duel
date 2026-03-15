@@ -8,7 +8,7 @@ from PySide6.QtCore import Qt, QTimer
 from PySide6.QtGui import QColor, QKeyEvent, QPainter, QPaintEvent
 from PySide6.QtWidgets import QLabel, QVBoxLayout, QWidget
 
-from src.agents.human import HumanAgent
+from src.agents.pacman.human import HumanAgent
 from src.core.domain import Direction, MatchStatus, Position, Role, Tile
 from src.game_session import GameSession
 
@@ -108,7 +108,8 @@ class GameView(QWidget):
 
         self._timer = QTimer(self)
         self._timer.timeout.connect(self._tick)
-        self._timer.start(160)
+        if not self._is_adaptive_mode():
+            self._timer.start(160)
         self._refresh_status()
 
     def showEvent(self, event) -> None:
@@ -148,6 +149,8 @@ class GameView(QWidget):
         pacman_agent = self._session.agents.get(Role.PACMAN)
         if isinstance(pacman_agent, HumanAgent):
             pacman_agent.set_pending_action(direction)
+        if self._is_adaptive_mode() and self._session.state.status == MatchStatus.RUNNING:
+            self._tick()
         self._board_canvas.update()
 
     def _attach_board_input(self) -> None:
@@ -171,4 +174,9 @@ class GameView(QWidget):
             MatchStatus.PACMAN_WIN: "Pacman wins",
             MatchStatus.ENEMY_WIN: "Enemy wins",
         }[state.status]
-        self._status_label.setText(f"Tick: {state.tick} | Status: {status_text}")
+        speed_text = "adaptive" if self._is_adaptive_mode() else f"x{state.speed_scaling_factor}"
+        self._status_label.setText(f"Tick: {state.tick} | Status: {status_text} | Enemy speed: {speed_text}")
+
+    def _is_adaptive_mode(self) -> bool:
+        """Return whether match progression is driven by user keypresses."""
+        return self._session.state.speed_scaling_factor == "adaptive"

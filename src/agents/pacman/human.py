@@ -1,16 +1,15 @@
-"""Human-controlled agent driven by externally supplied input."""
+"""Human-controlled Pacman agent driven by externally supplied input."""
 
 from __future__ import annotations
 
-from src.core.domain import Direction, GameState, Role
+from src.core.domain import Direction, GameState
 
 
 class HumanAgent:
-    """Return the latest queued human input for one role."""
+    """Return the latest queued human input for Pacman."""
 
-    def __init__(self, role: Role) -> None:
-        """Bind the agent to a role and start with no pending input."""
-        self.role = role
+    def __init__(self) -> None:
+        """Start with no pending input."""
         self._pending_action = Direction.STAY
 
     def set_pending_action(self, action: Direction) -> None:

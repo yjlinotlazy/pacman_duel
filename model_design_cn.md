@@ -98,11 +98,17 @@ pacman_duel/
       engine.py
     agents/
       base.py
-      human.py
-      random_agent.py
-      shortest_path.py
-      copycat.py
-      rl_agent.py
+      pacman/
+        base.py
+        human.py
+        random.py
+        rl.py
+      slime/
+        base.py
+        random.py
+        shortest_path.py
+        copycat.py
+        rl.py
     training/
       env.py
       observation.py
@@ -180,10 +186,16 @@ pacman_duel/
 - 定义 checkpoint 的命名、元数据和保留策略
 - 统一文件布局和模型元信息
 
-### `src/agents/rl_agent.py`
+### `src/agents/pacman/` 和 `src/agents/slime/`
+
+- 分别承载 Pacman 阵营和 slime 阵营的运行时策略
+- 在目录结构上显式表达不同阵营的目标差异
+- 避免把只适用于某一方的算法错误配置到另一方
+
+### `src/agents/pacman/rl.py` 和 `src/agents/slime/rl.py`
 
 - 从磁盘加载训练好的模型
-- 把当前状态转成 observation
+- 把当前状态转成各自阵营需要的 observation
 - 为当前 tick 返回一个动作
 - 不负责训练
 

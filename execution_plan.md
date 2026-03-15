@@ -44,22 +44,23 @@ Deliver a playable local version of `pacman_duel` with a clean separation betwee
 ### Objectives
 
 - Establish one stable `Agent` interface.
-- Implement baseline strategies needed for gameplay and evaluation.
+- Implement baseline strategies needed for gameplay and evaluation, split by Pacman-side and slime-side goals.
 
 ### Tasks
 
 - [x] Define the `Agent` protocol.
-- [x] Implement `HumanAgent`.
-- [x] Implement `RandomAgent`.
-- [x] Implement `ShortestPathAgent` using BFS.
-- [x] Implement `CopycatAgent` with two-phase replay behavior.
+- [x] Introduce separate Pacman-side and slime-side agent families.
+- [x] Implement Pacman-side `HumanAgent`.
+- [x] Implement Pacman-side and slime-side `RandomAgent`.
+- [x] Implement slime-side `ShortestPathAgent` using BFS.
+- [x] Implement slime-side `CopycatAgent` with two-phase replay behavior.
 - [x] Ensure all agents return actions without mutating game state.
 - [x] Add tests for baseline agent behavior.
 
 ### Exit Criteria
 
-- All built-in agents run through the same interface.
-- Baseline agents can be attached to a match session interchangeably.
+- Pacman-side and slime-side agents both satisfy the shared runtime protocol.
+- Side-incompatible algorithms are not configured interchangeably by mistake.
 - Agent behavior is covered by targeted tests.
 
 ## Milestone 3: Match Orchestration
@@ -136,7 +137,7 @@ Deliver a playable local version of `pacman_duel` with a clean separation betwee
 
 ### Tasks
 
-- [ ] Add `agents/rl_agent.py` as an inference-only agent.
+- [ ] Add `agents/pacman/rl.py` and `agents/slime/rl.py` as inference-only agents.
 - [ ] Define observation encoding conventions.
 - [ ] Define action-index to `Direction` mapping.
 - [ ] Define checkpoint metadata requirements.
@@ -145,7 +146,7 @@ Deliver a playable local version of `pacman_duel` with a clean separation betwee
 
 ### Exit Criteria
 
-- `RLAgent` has a stable runtime contract.
+- Pacman-side and slime-side RL agents each have a stable runtime contract.
 - Inference assumptions are documented and testable.
 - No training loop is embedded in the gameplay process.
 

@@ -2,10 +2,10 @@ from __future__ import annotations
 
 import pytest
 
-from src.agents.copycat import CopycatAgent
-from src.agents.human import HumanAgent
-from src.agents.random_agent import RandomAgent
-from src.agents.shortest_path import ShortestPathAgent
+from src.agents.pacman.human import HumanAgent
+from src.agents.pacman.random import RandomAgent as PacmanRandomAgent
+from src.agents.slime.copycat import CopycatAgent
+from src.agents.slime.shortest_path import ShortestPathAgent
 from src.app_controller import AgentConfig, AppController, MatchConfig
 from src.core.domain import Direction, Role
 
@@ -86,7 +86,7 @@ def test_switch_session_replaces_current_session() -> None:
 
     assert second is controller.current_session
     assert second is not first
-    assert isinstance(second.agents[Role.PACMAN], RandomAgent)
+    assert isinstance(second.agents[Role.PACMAN], PacmanRandomAgent)
     assert isinstance(second.agents[Role.SLIME], CopycatAgent)
     assert isinstance(second.agents[Role.HELPER], ShortestPathAgent)
 
@@ -94,7 +94,7 @@ def test_switch_session_replaces_current_session() -> None:
 def test_create_session_rejects_unknown_algorithm() -> None:
     controller = AppController()
 
-    with pytest.raises(ValueError, match="Unsupported algorithm"):
+    with pytest.raises(ValueError, match="Unsupported slime algorithm"):
         controller.create_session(
             make_match_config(
                 slime_config=AgentConfig("ai", "teleport"),

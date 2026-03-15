@@ -6,6 +6,8 @@ from dataclasses import replace
 
 from .domain import Direction, EntityState, GameState, MatchStatus, MOVE_PRIORITY, Role
 
+DEFAULT_SPEED_SCALING_FACTOR = 1
+
 
 def legal_actions(state: GameState, role: Role) -> tuple[Direction, ...]:
     """Return all legal moves for one role, always including `STAY`."""
@@ -19,6 +21,9 @@ def legal_actions(state: GameState, role: Role) -> tuple[Direction, ...]:
 
 def sanitize_action(state: GameState, role: Role, action: Direction) -> Direction:
     """Map illegal requested actions to `STAY` before applying them."""
+    speed_scaling_factor = _resolved_speed_scaling_factor(state.speed_scaling_factor)
+    if role in {Role.SLIME, Role.HELPER} and state.tick % speed_scaling_factor != 0:
+        return Direction.STAY
     return action if action in legal_actions(state, role) else Direction.STAY
 
 
@@ -53,3 +58,10 @@ def resolve_status(state: GameState) -> GameState:
     if pacman_captured:
         return replace(state, status=MatchStatus.ENEMY_WIN)
     return state
+
+
+def _resolved_speed_scaling_factor(raw_value: int | str) -> int:
+    """Normalize the configured speed scaling factor for rule evaluation."""
+    if isinstance(raw_value, int):
+        return max(raw_value, DEFAULT_SPEED_SCALING_FACTOR)
+    return DEFAULT_SPEED_SCALING_FACTOR

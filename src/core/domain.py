@@ -85,6 +85,7 @@ class GameState:
     dots: frozenset[Position]
     status: MatchStatus = MatchStatus.RUNNING
     tick: int = 0
+    speed_scaling_factor: int | str = 1
     pacman_start: Position | None = None
     pacman_history: tuple[Direction, ...] = ()
 

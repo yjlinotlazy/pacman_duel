@@ -1,4 +1,4 @@
-"""Shortest-path pursuit agent built on BFS."""
+"""Shortest-path slime-side pursuit agent built on BFS."""
 
 from __future__ import annotations
 
@@ -10,12 +10,13 @@ class ShortestPathAgent:
     """Move toward a target role using the board's shortest walkable path."""
 
     def __init__(self, role: Role, target_role: Role = Role.PACMAN) -> None:
-        """Bind the acting role and the role it should chase."""
+        """Bind the acting slime-side role and the role it should chase."""
         self.role = role
         self.target_role = target_role
 
     def next_action(self, state: GameState, config: dict | None = None) -> Direction:
         """Choose the first BFS step from the actor to the current target."""
+        del config
         start = state.entity_for(self.role).position
         goal = state.entity_for(self.target_role).position
         return bfs_shortest_path_direction(

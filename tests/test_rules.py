@@ -127,3 +127,87 @@ def test_sanitize_action_maps_illegal_move_to_stay() -> None:
     )
 
     assert sanitize_action(state, Role.PACMAN, Direction.UP) == Direction.STAY
+
+
+def test_helper_only_moves_every_other_tick() -> None:
+    state = build_state(
+        (
+            "#######",
+            "#P   S#",
+            "#  . H#",
+            "#######",
+        )
+    )
+    state = state.__class__(
+        board=state.board,
+        pacman=state.pacman,
+        slime=state.slime,
+        helper=state.helper,
+        dots=state.dots,
+        status=state.status,
+        tick=state.tick,
+        speed_scaling_factor=2,
+        pacman_start=state.pacman_start,
+        pacman_history=state.pacman_history,
+    )
+
+    engine = GameEngine(state)
+    first = engine.step(
+        {
+            Role.PACMAN: Direction.STAY,
+            Role.SLIME: Direction.STAY,
+            Role.HELPER: Direction.LEFT,
+        }
+    )
+    second = engine.step(
+        {
+            Role.PACMAN: Direction.STAY,
+            Role.SLIME: Direction.STAY,
+            Role.HELPER: Direction.LEFT,
+        }
+    )
+
+    assert first.helper.position == Position(4, 2)
+    assert second.helper.position == Position(4, 2)
+
+
+def test_slime_only_moves_every_other_tick_when_speed_scaling_factor_is_two() -> None:
+    state = build_state(
+        (
+            "#######",
+            "#P   S#",
+            "#  . H#",
+            "#######",
+        )
+    )
+    state = state.__class__(
+        board=state.board,
+        pacman=state.pacman,
+        slime=state.slime,
+        helper=state.helper,
+        dots=state.dots,
+        status=state.status,
+        tick=state.tick,
+        speed_scaling_factor=2,
+        pacman_start=state.pacman_start,
+        pacman_history=state.pacman_history,
+    )
+
+    engine = GameEngine(state)
+    first = engine.step(
+        {
+            Role.PACMAN: Direction.STAY,
+            Role.SLIME: Direction.LEFT,
+            Role.HELPER: Direction.STAY,
+        }
+    )
+    second = engine.step(
+        {
+            Role.PACMAN: Direction.STAY,
+            Role.SLIME: Direction.LEFT,
+            Role.HELPER: Direction.STAY,
+        }
+    )
+
+    assert first.slime.position == Position(4, 1)
+    assert second.slime.position == Position(4, 1)

@@ -6,10 +6,11 @@ from dataclasses import dataclass, field
 from typing import Any
 
 from src.agents.base import Agent
-from src.agents.copycat import CopycatAgent
-from src.agents.human import HumanAgent
-from src.agents.random_agent import RandomAgent
-from src.agents.shortest_path import ShortestPathAgent
+from src.agents.pacman.human import HumanAgent
+from src.agents.pacman.random import RandomAgent as PacmanRandomAgent
+from src.agents.slime.copycat import CopycatAgent
+from src.agents.slime.random import RandomAgent as SlimeRandomAgent
+from src.agents.slime.shortest_path import ShortestPathAgent
 from src.core.board import Board
 from src.core.domain import Role
 from src.core.engine import GameEngine, build_initial_state
@@ -33,6 +34,7 @@ class MatchConfig:
     pacman_config: AgentConfig
     slime_config: AgentConfig
     helper_config: AgentConfig
+    speed_scaling_factor: int | str = 1
 
 
 class AppController:
@@ -50,11 +52,15 @@ class AppController:
     def create_session(self, config: MatchConfig) -> GameSession:
         """Build a fresh session from a match config and make it current."""
         board, spawns = Board.from_ascii(config.board_layout)
-        initial_state = build_initial_state(board, spawns)
+        initial_state = build_initial_state(
+            board,
+            spawns,
+            speed_scaling_factor=config.speed_scaling_factor,
+        )
         agents = {
-            Role.PACMAN: self._build_agent(Role.PACMAN, config.pacman_config),
-            Role.SLIME: self._build_agent(Role.SLIME, config.slime_config),
-            Role.HELPER: self._build_agent(Role.HELPER, config.helper_config),
+            Role.PACMAN: self._build_pacman_agent(config.pacman_config),
+            Role.SLIME: self._build_slime_agent(Role.SLIME, config.slime_config),
+            Role.HELPER: self._build_slime_agent(Role.HELPER, config.helper_config),
         }
         agent_config = {
             Role.PACMAN: dict(config.pacman_config.params),
@@ -84,16 +90,26 @@ class AppController:
         self.destroy_session()
         return self.create_session(config)
 
-    def _build_agent(self, role: Role, config: AgentConfig) -> Agent:
-        """Instantiate one agent from a UI-friendly controller config."""
+    def _build_pacman_agent(self, config: AgentConfig) -> Agent:
+        """Instantiate one Pacman-side agent from a UI-friendly controller config."""
         if config.controller_type == "human":
-            return HumanAgent(role)
+            return HumanAgent()
         if config.controller_type != "ai":
             raise ValueError(f"Unsupported controller_type: {config.controller_type}")
 
         algorithm = config.algorithm
         if algorithm == "random":
-            return RandomAgent(role=role, seed=config.params.get("seed"))
+            return PacmanRandomAgent(seed=config.params.get("seed"))
+        raise ValueError(f"Unsupported Pacman algorithm: {algorithm}")
+
+    def _build_slime_agent(self, role: Role, config: AgentConfig) -> Agent:
+        """Instantiate one slime-side agent from a UI-friendly controller config."""
+        if config.controller_type != "ai":
+            raise ValueError(f"Unsupported controller_type for slime-side role: {config.controller_type}")
+
+        algorithm = config.algorithm
+        if algorithm == "random":
+            return SlimeRandomAgent(role=role, seed=config.params.get("seed"))
         if algorithm == "shortest_path":
             return ShortestPathAgent(
                 role=role,
@@ -104,7 +120,7 @@ class AppController:
                 role=role,
                 target_role=self._target_role_for(role, config.params),
             )
-        raise ValueError(f"Unsupported algorithm: {algorithm}")
+        raise ValueError(f"Unsupported slime algorithm: {algorithm}")
 
     def _target_role_for(self, role: Role, params: dict[str, Any]) -> Role:
         """Resolve an optional target role parameter for pursuit-style agents."""

@@ -82,11 +82,17 @@ pacman_duel/
       engine.py
     agents/
       base.py
-      human.py
-      random_agent.py
-      shortest_path.py
-      copycat.py
-      rl_agent.py
+      pacman/
+        base.py
+        human.py
+        random.py
+        rl.py
+      slime/
+        base.py
+        random.py
+        shortest_path.py
+        copycat.py
+        rl.py
     stats/
       history_store.py
       winrate.py
@@ -184,48 +190,14 @@ class Agent(Protocol):
     def reset(self) -> None: ...
 ```
 
-### Agent 层级
+### 按阵营划分的 Agent 家族
 
-![Agent 层级图](docs/diagrams/images/agent_hierarchy.png)
+- `src/agents/pacman/` 存放目标是帮助 Pacman 获胜的 agent。
+- `src/agents/slime/` 存放敌方阵营 agent，包括 helper 的行为实现。
+- `Helper` 应视为 slime 阵营的一部分，而不是单独的第三类 agent。
+- `AppController` 应按阵营校验可选算法，避免把只适用于 Pacman 或 slime 的策略混用。
 
-源文件：`docs/diagrams/mermaid/agent_hierarchy.mmd`
-
-### 内置策略
-
-#### `HumanAgent`
-
-- 从 UI 读取最后一次有效输入
-- 不应该直接依赖具体 widget 逻辑
-
-#### `RandomAgent`
-
-- 从合法动作中随机选择
-- 适合作为 baseline 和基础 smoke test
-
-#### `ShortestPathAgent`
-
-- 使用 BFS
-- 路径搜索辅助逻辑来自 `src/algorithms/pathfinding.py`
-- 史莱姆目标：当前 Pacman 位置
-- 助手目标：当前 Pacman 位置
-- 后续可以增加平局时的 tie-break 配置
-
-#### `CopycatAgent`
-
-分两阶段执行：
-
-1. 先移动到 Pacman 初始位置
-2. 然后精确回放 Pacman 的历史动作，必要时也回放 `STAY`
-
-![Copycat 状态图](docs/diagrams/images/copycat_state_cn.png)
-
-源文件：`docs/diagrams/mermaid/copycat_state_cn.mmd`
-
-#### `RLAgent`
-
-- 先把接口稳定下来
-- 第一阶段允许只是一个占位实现
-- 训练过程不应放在实时 UI 循环里
+具体算法说明放在 `agents_cn.md`。
 
 ## 8. 应用层与会话层
 
@@ -386,9 +358,9 @@ class MatchConfig(BaseModel):
 
 #### Agent
 
-- `RandomAgent` 是否只返回合法动作
-- `ShortestPathAgent` 在有路径时是否会缩短距离
-- `CopycatAgent` 是否正确从 seek 模式切换到 replay 模式
+- Pacman 随机 agent 是否只返回合法 Pacman 动作
+- slime 最短路 agent 在有路径时是否会缩短距离
+- slime copycat agent 是否正确从 seek 模式切换到 replay 模式
 
 #### 统计
 
@@ -401,13 +373,13 @@ class MatchConfig(BaseModel):
 ### 里程碑 1
 
 - 实现 `Board`、`GameState`、`RuleEngine`、`GameEngine`
-- 实现 `HumanAgent`、`RandomAgent`、`ShortestPathAgent`
+- 实现 pacman `HumanAgent`、pacman/slime `RandomAgent` 和 slime `ShortestPathAgent`
 - 搭建基础菜单和游戏视图
 - 持久化保存每局对战结果
 
 ### 里程碑 2
 
-- 实现 `CopycatAgent`
+- 实现 slime `CopycatAgent`
 - 增加进阶模式配置 UI
 - 增加基于历史数据的胜率展示
 
