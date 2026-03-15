@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from PySide6.QtWidgets import QApplication
 
+from src.boards.classic_inspired_board import CLASSIC_INSPIRED_BOARD_LAYOUT
+from src.boards.default_board import DEFAULT_BOARD_LAYOUT
 from src.ui.config_panel import ConfigPanel
 
 
@@ -61,3 +63,18 @@ def test_match_config_can_select_adaptive_speed_scaling() -> None:
     config = panel.build_match_config()
 
     assert config.speed_scaling_factor == "adaptive"
+
+
+def test_board_selector_defaults_to_default_board() -> None:
+    _get_or_create_app()
+    panel = ConfigPanel()
+
+    assert panel.build_match_config().board_layout == DEFAULT_BOARD_LAYOUT
+
+
+def test_board_selector_can_choose_classic_inspired_board() -> None:
+    _get_or_create_app()
+    panel = ConfigPanel()
+    panel._board_selector.setCurrentIndex(1)
+
+    assert panel.build_match_config().board_layout == CLASSIC_INSPIRED_BOARD_LAYOUT

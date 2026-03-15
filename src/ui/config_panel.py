@@ -5,6 +5,7 @@ from __future__ import annotations
 from PySide6.QtWidgets import QComboBox, QFormLayout, QGroupBox, QWidget
 
 from src.app_controller import AgentConfig, MatchConfig
+from src.boards.classic_inspired_board import CLASSIC_INSPIRED_BOARD_LAYOUT
 from src.boards.default_board import DEFAULT_BOARD_LAYOUT
 
 
@@ -18,6 +19,10 @@ class ConfigPanel(QWidget):
         self._pacman_controller = QComboBox()
         self._pacman_controller.addItem("Human", AgentConfig("human"))
         self._pacman_controller.addItem("AI: Random", AgentConfig("ai", "random"))
+
+        self._board_selector = QComboBox()
+        self._board_selector.addItem("Default Maze", DEFAULT_BOARD_LAYOUT)
+        self._board_selector.addItem("Classic Inspired", CLASSIC_INSPIRED_BOARD_LAYOUT)
 
         self._slime_algorithm = QComboBox()
         self._slime_algorithm.addItem("Random", AgentConfig("ai", "random"))
@@ -38,6 +43,7 @@ class ConfigPanel(QWidget):
 
         group = QGroupBox("Match Setup")
         form = QFormLayout(group)
+        form.addRow("Board", self._board_selector)
         form.addRow("Pacman", self._pacman_controller)
         form.addRow("Slime AI", self._slime_algorithm)
         form.addRow("Helper AI", self._helper_algorithm)
@@ -49,7 +55,7 @@ class ConfigPanel(QWidget):
     def build_match_config(self) -> MatchConfig:
         """Build the `MatchConfig` selected by the user."""
         return MatchConfig(
-            board_layout=DEFAULT_BOARD_LAYOUT,
+            board_layout=self._board_selector.currentData(),
             pacman_config=self._pacman_controller.currentData(),
             slime_config=self._slime_algorithm.currentData(),
             helper_config=self._helper_algorithm.currentData(),
