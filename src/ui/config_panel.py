@@ -5,14 +5,7 @@ from __future__ import annotations
 from PySide6.QtWidgets import QComboBox, QFormLayout, QGroupBox, QWidget
 
 from src.app_controller import AgentConfig, MatchConfig
-
-DEFAULT_BOARD_LAYOUT: tuple[str, ...] = (
-    "##########",
-    "#P......S#",
-    "#.######.#",
-    "#...H....#",
-    "##########",
-)
+from src.boards.default_board import DEFAULT_BOARD_LAYOUT
 
 
 class ConfigPanel(QWidget):
