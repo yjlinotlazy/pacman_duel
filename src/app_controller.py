@@ -9,8 +9,10 @@ from typing import Any
 from src.agents.base import Agent
 from src.agents.pacman.human import HumanAgent
 from src.agents.pacman.random import RandomAgent as PacmanRandomAgent
+from src.agents.pacman.rl import RLAgent as PacmanRLAgent
 from src.agents.slime.copycat import CopycatAgent
 from src.agents.slime.random import RandomAgent as SlimeRandomAgent
+from src.agents.slime.rl import RLAgent as SlimeRLAgent
 from src.agents.slime.shortest_path import ShortestPathAgent
 from src.core.board import Board
 from src.core.domain import MatchStatus, Role
@@ -150,6 +152,8 @@ class AppController:
         algorithm = config.algorithm
         if algorithm == "random":
             return PacmanRandomAgent(seed=config.params.get("seed"))
+        if algorithm == "rl":
+            return PacmanRLAgent(checkpoint_path=self._checkpoint_path_from(config.params))
         raise ValueError(f"Unsupported Pacman algorithm: {algorithm}")
 
     def _build_slime_agent(self, role: Role, config: AgentConfig) -> Agent:
@@ -170,6 +174,11 @@ class AppController:
                 role=role,
                 target_role=self._target_role_for(role, config.params),
             )
+        if algorithm == "rl":
+            return SlimeRLAgent(
+                role=role,
+                checkpoint_path=self._checkpoint_path_from(config.params),
+            )
         raise ValueError(f"Unsupported slime algorithm: {algorithm}")
 
     def _target_role_for(self, role: Role, params: dict[str, Any]) -> Role:
@@ -189,3 +198,10 @@ class AppController:
         if config.controller_type == "human":
             return "human"
         return config.algorithm or config.controller_type
+
+    def _checkpoint_path_from(self, params: dict[str, Any]) -> str:
+        """Extract the required checkpoint path from one agent config."""
+        checkpoint_path = params.get("checkpoint_path")
+        if not isinstance(checkpoint_path, str) or not checkpoint_path:
+            raise ValueError("RL agents require a non-empty checkpoint_path parameter")
+        return checkpoint_path
