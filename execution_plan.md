@@ -117,6 +117,7 @@ Deliver a playable local version of `pacman_duel` with a clean separation betwee
 - [x] Implement `MainWindow`.
 - [x] Implement menu and configuration screens.
 - [x] Implement the game view.
+- [x] Keep the match configuration controls visible during gameplay so users can restart without navigating back.
 - [ ] Implement a stats panel for history-backed summaries.
 - [x] Wire keyboard input for human-controlled matches.
 - [x] Support leaving a match and returning to the menu without affecting core rules.
@@ -125,6 +126,7 @@ Deliver a playable local version of `pacman_duel` with a clean separation betwee
 ### Exit Criteria
 
 - A full local match can be started, played, and exited from the GUI.
+- Match setup controls remain accessible while a local match is running.
 - Configuration and stats panels work against the orchestration and stats layers.
 - UI code does not contain core game-rule logic.
 

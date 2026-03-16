@@ -101,7 +101,7 @@ class GameView(QWidget):
         self._board_canvas = BoardCanvas(session, self)
 
         layout = QVBoxLayout(self)
-        layout.addWidget(QLabel("Arrow keys move Pacman. Press R to replay. Press Q or Esc to return to the menu."))
+        layout.addWidget(QLabel("Arrow keys move Pacman. Press R to replay. Press Q or Esc to stop the current match."))
         layout.addWidget(self._status_label)
         layout.addWidget(self._board_canvas)
         self._attach_board_input()
