@@ -90,6 +90,7 @@ class GameView(QWidget):
         session: GameSession,
         restart_match: Callable[[], None],
         return_to_menu: Callable[[], None],
+        on_match_finished: Callable[[], None],
         parent: QWidget | None = None,
     ) -> None:
         """Create the board view and start the match timer."""
@@ -97,6 +98,7 @@ class GameView(QWidget):
         self._session = session
         self._restart_match = restart_match
         self._return_to_menu = return_to_menu
+        self._on_match_finished = on_match_finished
         self._status_label = QLabel()
         self._board_canvas = BoardCanvas(session, self)
 
@@ -165,6 +167,7 @@ class GameView(QWidget):
         self._board_canvas.update()
         if self._session.state.status != MatchStatus.RUNNING:
             self._timer.stop()
+            self._on_match_finished()
 
     def _refresh_status(self) -> None:
         """Update the status text shown above the board."""

@@ -2,15 +2,23 @@
 
 from __future__ import annotations
 
+from PySide6.QtCore import Signal
 from PySide6.QtWidgets import QComboBox, QFormLayout, QGroupBox, QWidget
 
 from src.app_controller import AgentConfig, MatchConfig
 from src.boards.classic_inspired_board import CLASSIC_INSPIRED_BOARD_LAYOUT
 from src.boards.default_board import DEFAULT_BOARD_LAYOUT
 
+BOARD_OPTIONS = (
+    ("Default Maze", "default", DEFAULT_BOARD_LAYOUT),
+    ("Classic Inspired", "classic_inspired", CLASSIC_INSPIRED_BOARD_LAYOUT),
+)
+
 
 class ConfigPanel(QWidget):
     """Collect minimal runtime configuration for a playable local match."""
+
+    config_changed = Signal()
 
     def __init__(self, parent: QWidget | None = None) -> None:
         """Create the controller and algorithm selectors."""
@@ -21,8 +29,8 @@ class ConfigPanel(QWidget):
         self._pacman_controller.addItem("AI: Random", AgentConfig("ai", "random"))
 
         self._board_selector = QComboBox()
-        self._board_selector.addItem("Default Maze", DEFAULT_BOARD_LAYOUT)
-        self._board_selector.addItem("Classic Inspired", CLASSIC_INSPIRED_BOARD_LAYOUT)
+        for label, board_id, board_layout in BOARD_OPTIONS:
+            self._board_selector.addItem(label, (board_id, board_layout))
 
         self._slime_algorithm = QComboBox()
         self._slime_algorithm.addItem("Random", AgentConfig("ai", "random"))
@@ -52,10 +60,21 @@ class ConfigPanel(QWidget):
         layout = QFormLayout(self)
         layout.addRow(group)
 
+        for widget in (
+            self._board_selector,
+            self._pacman_controller,
+            self._slime_algorithm,
+            self._helper_algorithm,
+            self._speed_scaling_factor,
+        ):
+            widget.currentIndexChanged.connect(self.config_changed.emit)
+
     def build_match_config(self) -> MatchConfig:
         """Build the `MatchConfig` selected by the user."""
+        board_id, board_layout = self._board_selector.currentData()
         return MatchConfig(
-            board_layout=self._board_selector.currentData(),
+            board_id=board_id,
+            board_layout=board_layout,
             pacman_config=self._pacman_controller.currentData(),
             slime_config=self._slime_algorithm.currentData(),
             helper_config=self._helper_algorithm.currentData(),

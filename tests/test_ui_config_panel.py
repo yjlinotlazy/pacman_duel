@@ -69,6 +69,7 @@ def test_board_selector_defaults_to_default_board() -> None:
     _get_or_create_app()
     panel = ConfigPanel()
 
+    assert panel.build_match_config().board_id == "default"
     assert panel.build_match_config().board_layout == DEFAULT_BOARD_LAYOUT
 
 
@@ -77,4 +78,5 @@ def test_board_selector_can_choose_classic_inspired_board() -> None:
     panel = ConfigPanel()
     panel._board_selector.setCurrentIndex(1)
 
+    assert panel.build_match_config().board_id == "classic_inspired"
     assert panel.build_match_config().board_layout == CLASSIC_INSPIRED_BOARD_LAYOUT

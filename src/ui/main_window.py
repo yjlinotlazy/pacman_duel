@@ -7,6 +7,7 @@ from PySide6.QtWidgets import QHBoxLayout, QLabel, QMainWindow, QPushButton, QVB
 from src.app_controller import AppController, MatchConfig
 from src.ui.config_panel import ConfigPanel
 from src.ui.game_view import GameView
+from src.ui.stats_panel import StatsPanel
 
 
 class MainWindow(QMainWindow):
@@ -24,6 +25,8 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(root)
 
         self._config_panel = ConfigPanel(self)
+        self._config_panel.config_changed.connect(self._refresh_stats)
+        self._stats_panel = StatsPanel(self)
         self._status_banner = QLabel("Configure a match above, then start playing below.")
         self._status_banner.setWordWrap(True)
 
@@ -49,8 +52,10 @@ class MainWindow(QMainWindow):
 
         layout = QVBoxLayout(root)
         layout.addWidget(self._config_panel)
+        layout.addWidget(self._stats_panel)
         layout.addLayout(button_row)
         layout.addLayout(self._content_layout)
+        self._refresh_stats()
 
     def _start_match_from_panel(self) -> None:
         """Start a match using the currently visible configuration controls."""
@@ -65,6 +70,7 @@ class MainWindow(QMainWindow):
             session=session,
             restart_match=self._restart_match,
             return_to_menu=self._clear_match,
+            on_match_finished=self._handle_match_finished,
             parent=self,
         )
         self._content_layout.addWidget(game_view)
@@ -89,3 +95,14 @@ class MainWindow(QMainWindow):
             game_view.deleteLater()
             self._game_view = None
         self._status_banner.setText("Configure a match above, then start playing below.")
+
+    def _handle_match_finished(self) -> None:
+        """Persist the completed match once and refresh the visible stats."""
+        self._controller.persist_current_result_if_needed()
+        self._refresh_stats()
+
+    def _refresh_stats(self) -> None:
+        """Refresh the history summary for the currently selected configuration."""
+        self._stats_panel.set_summary(
+            self._controller.get_summary_for_config(self._config_panel.build_match_config()),
+        )

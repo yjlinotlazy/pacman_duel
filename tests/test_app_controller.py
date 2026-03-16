@@ -7,7 +7,8 @@ from src.agents.pacman.random import RandomAgent as PacmanRandomAgent
 from src.agents.slime.copycat import CopycatAgent
 from src.agents.slime.shortest_path import ShortestPathAgent
 from src.app_controller import AgentConfig, AppController, MatchConfig
-from src.core.domain import Direction, Role
+from src.core.domain import Direction, MatchStatus, Role
+from src.stats.history_store import JsonlMatchHistoryStore
 
 
 def make_match_config(
@@ -16,6 +17,7 @@ def make_match_config(
     helper_config: AgentConfig | None = None,
 ) -> MatchConfig:
     return MatchConfig(
+        board_id="default",
         board_layout=(
             "#######",
             "#P...S#",
@@ -107,3 +109,61 @@ def test_reset_session_requires_active_session() -> None:
 
     with pytest.raises(RuntimeError, match="No active session"):
         controller.reset_session()
+
+
+def test_persist_current_result_records_completed_match_once(tmp_path) -> None:
+    controller = AppController(JsonlMatchHistoryStore(tmp_path / "matches.jsonl"))
+    session = controller.create_session(
+        make_match_config(
+            pacman_config=AgentConfig("human"),
+            slime_config=AgentConfig("ai", "random", {"seed": 7}),
+            helper_config=AgentConfig("ai", "shortest_path"),
+        )
+    )
+    session.engine._state = session.state.__class__(
+        board=session.state.board,
+        pacman=session.state.pacman,
+        slime=session.state.slime,
+        helper=session.state.helper,
+        dots=session.state.dots,
+        status=MatchStatus.ENEMY_WIN,
+        tick=12,
+        speed_scaling_factor=session.state.speed_scaling_factor,
+        pacman_start=session.state.pacman_start,
+        pacman_history=session.state.pacman_history,
+    )
+
+    first = controller.persist_current_result_if_needed()
+    second = controller.persist_current_result_if_needed()
+    stored = controller._history_store.load_results()
+
+    assert first is not None
+    assert second is None
+    assert len(stored) == 1
+    assert stored[0].winner == MatchStatus.ENEMY_WIN
+    assert stored[0].board_id == "default"
+    assert stored[0].parameter_snapshot["speed_scaling_factor"] == 1
+
+
+def test_get_summary_for_config_uses_persisted_history(tmp_path) -> None:
+    controller = AppController(JsonlMatchHistoryStore(tmp_path / "matches.jsonl"))
+    session = controller.create_session(make_match_config())
+    session.engine._state = session.state.__class__(
+        board=session.state.board,
+        pacman=session.state.pacman,
+        slime=session.state.slime,
+        helper=session.state.helper,
+        dots=session.state.dots,
+        status=MatchStatus.PACMAN_WIN,
+        tick=9,
+        speed_scaling_factor=session.state.speed_scaling_factor,
+        pacman_start=session.state.pacman_start,
+        pacman_history=session.state.pacman_history,
+    )
+    controller.persist_current_result_if_needed()
+
+    summary = controller.get_summary_for_config(make_match_config())
+
+    assert summary.samples == 1
+    assert summary.pacman_win_rate == 1.0
+    assert summary.enemy_win_rate == 0.0

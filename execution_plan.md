@@ -94,7 +94,7 @@ Deliver a playable local version of `pacman_duel` with a clean separation betwee
 ### Tasks
 
 - [x] Implement a history storage format.
-- [ ] Persist match outcome, agent choices, and relevant config metadata.
+- [x] Persist match outcome, agent choices, and relevant config metadata.
 - [x] Implement summary generation utilities.
 - [x] Implement win-rate aggregation from stored results.
 - [x] Add tests for storage and aggregation behavior.
@@ -118,7 +118,7 @@ Deliver a playable local version of `pacman_duel` with a clean separation betwee
 - [x] Implement menu and configuration screens.
 - [x] Implement the game view.
 - [x] Keep the match configuration controls visible during gameplay so users can restart without navigating back.
-- [ ] Implement a stats panel for history-backed summaries.
+- [x] Implement a stats panel for history-backed summaries.
 - [x] Wire keyboard input for human-controlled matches.
 - [x] Support leaving a match and returning to the menu without affecting core rules.
 - [x] Verify the local GUI works under Wayland.
