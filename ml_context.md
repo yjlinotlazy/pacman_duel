@@ -51,6 +51,8 @@ Training-side scaffolding:
 - `src/training/observation.py`
 - `src/training/reward.py`
 - `src/training/train_rl.py`
+- `src/training/checkpoints.py`
+- `src/training/evaluate_rl.py`
 
 ## Why Separate Pacman And Slime RL Agents
 
@@ -158,6 +160,15 @@ Current checkpoint policy formats:
 
 The long-term checkpoint format can evolve, but the runtime now expects a checkpoint to produce a runner object rather than exposing raw checkpoint contents to the agent.
 
+Training-side checkpoint export is now centralized in `src/training/checkpoints.py`.
+
+Current conventions:
+
+- filenames are timestamped and role-prefixed
+- payloads are written in a runtime-compatible JSON format
+- metadata always includes schema, observation, and action-mapping versions
+- retention can prune older checkpoints by role family
+
 If metadata does not match the runtime contract, the load should fail fast with a clear error.
 
 ## AppController Integration
@@ -231,6 +242,8 @@ Implemented:
 - A runner boundary exists between agents and checkpoint payloads.
 - A shared observation contract is used by both runtime inference and training scaffolding.
 - A minimal standalone training package exists outside the UI and gameplay loop.
+- Training-side checkpoint save/export helpers exist with retention support.
+- Offline evaluation can run RL checkpoints against baseline agents and summarize results.
 
 Still intentionally deferred:
 
@@ -243,7 +256,7 @@ Still intentionally deferred:
 ## Recommended Next Steps
 
 1. Add checkpoint save/export conventions so training artifacts match runtime expectations.
-2. Implement offline evaluation tooling for trained policies against baseline agents.
-3. Replace placeholder training episode logic with a real training loop.
-4. Expand policy runner support beyond `static_scores` and `linear`.
+2. Replace placeholder training episode logic with a real training loop.
+3. Expand policy runner support beyond `static_scores` and `linear`.
+4. Add richer evaluation reporting and checkpoint-selection workflows in the app.
 5. Add operational logging and richer failure diagnostics around checkpoint loading and inference.

@@ -185,11 +185,11 @@ Deliver a playable local version of `pacman_duel` with a clean separation betwee
 
 ### Tasks
 
-- [ ] Implement checkpoint save/load conventions.
-- [ ] Implement metadata versioning for checkpoints.
-- [ ] Implement retention rules for multiple checkpoints.
-- [ ] Implement `training/evaluate_rl.py`.
-- [ ] Compare trained policies against baseline agents.
+- [x] Implement checkpoint save/load conventions.
+- [x] Implement metadata versioning for checkpoints.
+- [x] Implement retention rules for multiple checkpoints.
+- [x] Implement `training/evaluate_rl.py`.
+- [x] Compare trained policies against baseline agents.
 - [ ] Record evaluation summaries that can inform model selection.
 
 ### Exit Criteria
