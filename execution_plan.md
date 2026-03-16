@@ -139,12 +139,14 @@ Deliver a playable local version of `pacman_duel` with a clean separation betwee
 
 ### Tasks
 
-- [ ] Add `agents/pacman/rl.py` and `agents/slime/rl.py` as inference-only agents.
-- [ ] Define observation encoding conventions.
-- [ ] Define action-index to `Direction` mapping.
-- [ ] Define checkpoint metadata requirements.
-- [ ] Define model-loading behavior and failure handling.
-- [ ] Add tests for observation/action contract stability.
+- [x] Add `agents/pacman/rl.py` and `agents/slime/rl.py` as inference-only agents.
+- [x] Define observation encoding conventions.
+- [x] Define action-index to `Direction` mapping.
+- [x] Define checkpoint metadata requirements.
+- [x] Define model-loading behavior and failure handling.
+- [x] Add tests for observation/action contract stability.
+- [x] Add GUI support for selecting RL controllers and checkpoint paths.
+- [x] Introduce a runner boundary between checkpoints and live agents.
 
 ### Exit Criteria
 
@@ -161,12 +163,12 @@ Deliver a playable local version of `pacman_duel` with a clean separation betwee
 
 ### Tasks
 
-- [ ] Implement `training/env.py` as a `gymnasium`-style wrapper.
-- [ ] Implement `training/observation.py`.
-- [ ] Implement `training/reward.py`.
-- [ ] Implement `training/train_rl.py`.
-- [ ] Ensure training can run in a separate process from the app.
-- [ ] Add tests for `reset()`, `step()`, reward behavior, and episode termination.
+- [x] Implement `training/env.py` as a `gymnasium`-style wrapper.
+- [x] Implement `training/observation.py`.
+- [x] Implement `training/reward.py`.
+- [x] Implement `training/train_rl.py`.
+- [x] Ensure training can run in a separate process from the app.
+- [x] Add tests for `reset()`, `step()`, reward behavior, and episode termination.
 
 ### Exit Criteria
 

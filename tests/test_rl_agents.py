@@ -16,6 +16,7 @@ from src.agents.rl.encoding import OBSERVATION_VERSION, encode_observation
 from src.agents.slime.rl import RLAgent as SlimeRLAgent
 from src.app_controller import AgentConfig, AppController, MatchConfig
 from src.core.domain import Direction, Role
+from src.training.observation import observation_to_feature_vector
 from tests.conftest import build_state
 
 
@@ -23,7 +24,7 @@ def _write_checkpoint(
     tmp_path,
     *,
     role_family: str,
-    action_scores: list[object],
+    policy: dict[str, object],
     metadata_overrides: dict[str, object] | None = None,
 ):
     metadata = {
@@ -39,7 +40,7 @@ def _write_checkpoint(
         json.dumps(
             {
                 "metadata": metadata,
-                "policy": {"action_scores": action_scores},
+                "policy": policy,
             }
         ),
         encoding="utf-8",
@@ -79,18 +80,20 @@ def test_encode_observation_is_deterministic_and_role_aware() -> None:
     slime_observation = encode_observation(state, Role.SLIME)
 
     assert pacman_observation == repeated_observation
-    assert pacman_observation["version"] == OBSERVATION_VERSION
-    assert pacman_observation["actor_position"] == (1, 1)
-    assert slime_observation["actor_position"] == (3, 2)
-    assert pacman_observation["walls"]
-    assert pacman_observation["dots"] == ((3, 1),)
+    assert pacman_observation.version == OBSERVATION_VERSION
+    assert pacman_observation.actor_position == (1, 1)
+    assert slime_observation.actor_position == (3, 2)
+    assert pacman_observation.walls
+    assert pacman_observation.dots == ((3, 1),)
+    assert pacman_observation.as_dict()["role"] == "pacman"
+    assert len(observation_to_feature_vector(pacman_observation)) == 21
 
 
 def test_load_rl_checkpoint_rejects_role_family_mismatch(tmp_path) -> None:
     checkpoint_path = _write_checkpoint(
         tmp_path,
         role_family="pacman",
-        action_scores=[0, 0, 0, 1, 0],
+        policy={"runner_type": "static_scores", "action_scores": [0, 0, 0, 1, 0]},
     )
 
     with pytest.raises(RLCheckpointError, match="role_family"):
@@ -101,7 +104,7 @@ def test_pacman_rl_agent_uses_checkpoint_scores_to_choose_action(tmp_path) -> No
     checkpoint_path = _write_checkpoint(
         tmp_path,
         role_family="pacman",
-        action_scores=[0.1, 0.3, 0.2, 0.9, 0.0],
+        policy={"runner_type": "static_scores", "action_scores": [0.1, 0.3, 0.2, 0.9, 0.0]},
     )
     state = build_state(
         (
@@ -118,12 +121,18 @@ def test_pacman_rl_agent_uses_checkpoint_scores_to_choose_action(tmp_path) -> No
     assert agent.checkpoint.metadata["role_family"] == "pacman"
 
 
-def test_slime_rl_agent_returns_stay_for_malformed_policy_output(tmp_path) -> None:
+def test_slime_rl_agent_rejects_malformed_static_score_checkpoint(tmp_path) -> None:
     checkpoint_path = _write_checkpoint(
         tmp_path,
         role_family="slime",
-        action_scores=[0, 1, "bad", 0, 0],
+        policy={"runner_type": "static_scores", "action_scores": [0, 1, "bad", 0, 0]},
     )
+
+    with pytest.raises(RLCheckpointError, match="numeric values"):
+        SlimeRLAgent(Role.SLIME, checkpoint_path)
+
+
+def test_linear_runner_checkpoint_can_drive_policy_scores(tmp_path) -> None:
     state = build_state(
         (
             "#####",
@@ -132,22 +141,35 @@ def test_slime_rl_agent_returns_stay_for_malformed_policy_output(tmp_path) -> No
             "#####",
         )
     )
+    feature_count = len(observation_to_feature_vector(encode_observation(state, Role.PACMAN)))
+    weights = [[0.0] * feature_count for _ in range(len(ACTION_INDEX_TO_DIRECTION))]
+    weights[3][4] = 1.0
+    checkpoint_path = _write_checkpoint(
+        tmp_path,
+        role_family="pacman",
+        policy={
+            "runner_type": "linear",
+            "weights": weights,
+            "bias": [0, 0, 0, 0, 0],
+        },
+    )
 
-    agent = SlimeRLAgent(Role.SLIME, checkpoint_path)
+    agent = PacmanRLAgent(checkpoint_path)
 
-    assert agent.next_action(state, {}) == Direction.STAY
+    assert agent.next_action(state, {}) == Direction.RIGHT
+    assert agent.checkpoint.runner_type == "linear"
 
 
 def test_app_controller_builds_rl_agents_from_config(tmp_path) -> None:
     pacman_checkpoint = _write_checkpoint(
         tmp_path,
         role_family="pacman",
-        action_scores=[0, 0, 0, 1, 0],
+        policy={"runner_type": "static_scores", "action_scores": [0, 0, 0, 1, 0]},
     )
     slime_checkpoint = _write_checkpoint(
         tmp_path,
         role_family="slime",
-        action_scores=[1, 0, 0, 0, 0],
+        policy={"runner_type": "static_scores", "action_scores": [1, 0, 0, 0, 0]},
     )
     controller = AppController()
 

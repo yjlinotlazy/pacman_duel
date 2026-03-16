@@ -2,9 +2,9 @@
 
 ## Purpose
 
-This file records the intended implementation approach for reinforcement-learning-backed agents in `pacman_duel`.
+This file records the current reinforcement-learning implementation boundary for `pacman_duel`.
 
-The immediate goal is inference-only RL agents that fit the current runtime architecture without leaking training concerns into gameplay code.
+The immediate goal remains to keep gameplay inference and training separate, but the first runtime and training scaffolding is now implemented.
 
 ## Current Architectural Seam
 
@@ -29,22 +29,28 @@ That means:
 - `core/` should remain unchanged unless a genuinely shared domain abstraction is needed.
 - Training code should remain separate from live gameplay inference.
 
-## Planned Runtime Files
+## Current Runtime Files
 
-Add these inference-side runtime agents:
+Inference-side runtime agents:
 
 - `src/agents/pacman/rl.py`
 - `src/agents/slime/rl.py`
 
-These files should implement the same runtime interface as existing agents.
+These files implement the same runtime interface as existing agents.
 
-Likely supporting modules:
+Shared RL support modules:
 
 - `src/agents/rl/encoding.py`
 - `src/agents/rl/checkpoints.py`
 - `src/agents/rl/action_mapping.py`
+- `src/agents/rl/runner.py`
 
-These support modules should hold shared ML-facing contracts so they are not duplicated across Pacman-side and slime-side agents.
+Training-side scaffolding:
+
+- `src/training/env.py`
+- `src/training/observation.py`
+- `src/training/reward.py`
+- `src/training/train_rl.py`
 
 ## Why Separate Pacman And Slime RL Agents
 
@@ -59,11 +65,11 @@ Reasons:
 
 ## Inference Flow
 
-The intended per-tick RL inference flow is:
+The current per-tick RL inference flow is:
 
 1. Receive `GameState` in `next_action`.
 2. Encode the state into a deterministic observation for the acting role.
-3. Run one model forward pass.
+3. Run a checkpoint-backed policy runner.
 4. Convert the selected action index into `Direction`.
 5. Return the mapped direction.
 6. If output is malformed or unsupported, fall back safely.
@@ -72,24 +78,39 @@ The gameplay engine and rules remain responsible for normal action sanitization.
 
 ## Observation Contract
 
-Define one stable observation encoder function that takes current immutable game state and acting role, then returns an ML-friendly observation object.
+The current observation encoder returns a typed dataclass, `EncodedObservation`.
 
-Tentative interface:
+Current interface:
 
 ```python
-def encode_observation(state: GameState, role: Role) -> object:
+def encode_observation(state: GameState, role: Role) -> EncodedObservation:
     ...
 ```
 
-Requirements:
+Current properties:
 
 - Deterministic for identical inputs.
 - Independent from UI state.
-- Stable enough to be versioned.
+- Versioned.
 - Role-aware.
 - Safe to call once per tick.
 
-The exact tensor format can evolve, but the contract must be versioned and tested once introduced.
+Current version:
+
+- `OBSERVATION_VERSION = "v2"`
+
+Current contents include:
+
+- role and tick metadata
+- board size
+- actor, Pacman, slime, helper, and start positions
+- sorted dot and wall coordinates
+- Pacman history
+
+The dataclass also exposes:
+
+- `as_dict()` for structured serialization/debugging
+- `flat_features()` for a stable numeric feature vector shared by the training scaffold and simple inference runners
 
 ## Action Mapping Contract
 
@@ -117,7 +138,7 @@ The reverse mapping should be defined in the same module if training code will n
 
 ## Checkpoint Metadata Requirements
 
-Checkpoint loading should validate metadata before an RL agent is allowed to act.
+Checkpoint loading currently validates metadata before an RL agent is allowed to act.
 
 Required metadata should include:
 
@@ -125,13 +146,17 @@ Required metadata should include:
 - `role_family` with values such as `pacman` or `slime`
 - `observation_version`
 - `action_mapping_version`
-- model-specific architecture identifier if needed
+- runner-specific policy payload
 
-Optional metadata may include:
+Current checkpoint policy formats:
 
-- training board assumptions
-- reward version
-- expected framework/runtime version
+- `runner_type = "static_scores"`
+  - fixed `action_scores`
+- `runner_type = "linear"`
+  - `weights`
+  - `bias`
+
+The long-term checkpoint format can evolve, but the runtime now expects a checkpoint to produce a runner object rather than exposing raw checkpoint contents to the agent.
 
 If metadata does not match the runtime contract, the load should fail fast with a clear error.
 
@@ -139,10 +164,11 @@ If metadata does not match the runtime contract, the load should fail fast with 
 
 [src/app_controller.py](/home/yli/e/Dropbox/github/pacman_duel/src/app_controller.py) should remain the only place that translates user-facing config into concrete runtime agents.
 
-Planned additions:
+Current additions:
 
 - Pacman-side config should allow algorithm `"rl"`.
 - Slime-side config should allow algorithm `"rl"`.
+- The GUI now exposes RL controller selections and checkpoint path fields per role.
 
 Expected `AgentConfig.params` keys for RL agents:
 
@@ -156,12 +182,14 @@ This keeps runtime construction explicit and consistent with how baseline agents
 
 RL agent code should fail safely and predictably.
 
-Expected handling:
+Current handling:
 
 - invalid checkpoint path: fail agent construction with clear error
 - metadata mismatch: fail agent construction with clear error
-- malformed model output: return `Direction.STAY`
+- malformed static checkpoint payload: fail checkpoint load with clear error
+- malformed runner outputs: return `Direction.STAY`
 - unsupported action index: return `Direction.STAY`
+- invalid UI start configuration: show a status error instead of crashing the app
 
 The runtime should never crash mid-match because a model returned an unexpected value if that case can be handled locally and safely.
 
@@ -178,31 +206,44 @@ If the first implementation is stateless inference, `reset()` can be a no-op for
 
 ## Testing Priorities
 
-Milestone 6 should focus on contract stability, not model quality.
+Milestone 6 has focused on contract stability, not model quality.
 
 Tests should cover:
 
 - observation encoding shape/content stability
 - action-index mapping stability
 - checkpoint metadata validation
-- safe fallback for malformed outputs
+- runner parsing and simple inference behavior
 - `AppController` construction of Pacman and slime RL agents
+- RL checkpoint path selection in the config panel
+- start-match UI error handling for missing RL checkpoints
+- training environment reset/step/reward scaffolding
 
 The key objective is to make the runtime contract stable before implementing any real training workflow.
 
-## Non-Goals For The First RL Pass
+## Current Status
 
-The first RL integration should not:
+Implemented:
 
-- embed training loops into gameplay code
-- add ML framework dependencies into `src/core/`
-- make `GameSession` aware of RL-specific logic
-- optimize for advanced inference features before the contract is stable
+- RL agents are available through `AppController`.
+- RL options and checkpoint paths are available in the GUI config panel.
+- The app handles missing or invalid RL startup config without crashing.
+- A runner boundary exists between agents and checkpoint payloads.
+- A shared observation contract is used by both runtime inference and training scaffolding.
+- A minimal standalone training package exists outside the UI and gameplay loop.
+
+Still intentionally deferred:
+
+- real ML framework integration
+- checkpoint save/export conventions from training
+- offline evaluation tooling
+- richer training environment action handling for uncontrolled roles
+- app-managed training orchestration
 
 ## Recommended Next Steps
 
-1. Add shared RL contract helpers for observation encoding, checkpoint validation, and action mapping.
-2. Add inference-only RL agent classes under `src/agents/pacman/` and `src/agents/slime/`.
-3. Extend `AppController` to construct RL agents from `AgentConfig`.
-4. Add tests that lock down the observation/action/checkpoint contract.
-5. Only after that, implement the standalone training package under a separate `training/` area.
+1. Add checkpoint save/export conventions so training artifacts match runtime expectations.
+2. Implement offline evaluation tooling for trained policies against baseline agents.
+3. Replace placeholder training episode logic with a real training loop.
+4. Expand policy runner support beyond `static_scores` and `linear`.
+5. Add operational logging and richer failure diagnostics around checkpoint loading and inference.

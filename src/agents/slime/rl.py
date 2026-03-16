@@ -23,8 +23,8 @@ class RLAgent:
     def next_action(self, state: GameState, config: dict | None = None) -> Direction:
         """Run one inference step and map the result to a runtime direction."""
         del config
-        _ = encode_observation(state, self.role)
-        return best_direction_for_scores(self._checkpoint.action_scores)
+        observation = encode_observation(state, self.role)
+        return best_direction_for_scores(self._checkpoint.runner.action_scores(observation))
 
     def reset(self) -> None:
         """Reset hook for protocol compatibility; current inference is stateless."""
@@ -34,4 +34,3 @@ class RLAgent:
     def checkpoint(self) -> RLCheckpoint:
         """Expose loaded checkpoint metadata for testing and diagnostics."""
         return self._checkpoint
-

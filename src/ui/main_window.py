@@ -63,8 +63,17 @@ class MainWindow(QMainWindow):
 
     def _start_match(self, config: MatchConfig) -> None:
         """Create a session and show the playable game screen under the controls."""
+        try:
+            session = (
+                self._controller.switch_session(config)
+                if self._controller.current_session
+                else self._controller.create_session(config)
+            )
+        except ValueError as exc:
+            self._status_banner.setText(f"Unable to start match: {exc}")
+            return
+
         self._current_config = config
-        session = self._controller.switch_session(config) if self._controller.current_session else self._controller.create_session(config)
         self._clear_match(destroy_session=False)
         game_view = GameView(
             session=session,
