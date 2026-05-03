@@ -1,3 +1,7 @@
 __pycache__/
 *.py[cod]
 user_data/
+
+context.md
+CONTEXT.md
+CLAUDE.md
