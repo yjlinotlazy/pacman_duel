@@ -3,5 +3,6 @@ __pycache__/
 user_data/
 
 context.md
+ml_context.md
 CONTEXT.md
 CLAUDE.md
